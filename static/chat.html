@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ask Nexla</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f7fa;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .chat-container {
+      width: 90vw;
+      max-width: 900px;
+      height: 90vh;
+      min-height: 600px;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(44, 99, 255, 0.12), 0 1.5px 8px rgba(44, 99, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin: 32px 0;
+      opacity: 0;
+      animation: fadeIn 0.7s forwards;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    .nexla-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #6C63FF;
+      padding: 32px 0 18px 0;
+      flex-shrink: 0;
+    }
+    .nexla-header img {
+      height: 56px;
+      margin-right: 20px;
+    }
+    .nexla-header span {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .chat-history {
+      flex: 1;
+      padding: 56px 36px 36px 36px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      background: #f4f7fa;
+    }
+    .message {
+      max-width: 80%;
+      padding: 18px 28px;
+      border-radius: 20px;
+      font-size: 1rem;
+      line-height: 1.5;
+      word-break: break-word;
+      box-shadow: 0 1px 4px rgba(44, 99, 255, 0.04);
+      margin-bottom: 0;
+    }
+    .user {
+      align-self: flex-end;
+      background: #6C63FF;
+      color: #fff;
+      border-bottom-right-radius: 6px;
+    }
+    .bot {
+      align-self: flex-start;
+      background: #e6e7ff;
+      color: #3838e6;
+      border-bottom-left-radius: 6px;
+    }
+    .input-area {
+      display: flex;
+      padding: 24px;
+      border-top: 1px solid #eee;
+      background: #fafbfc;
+    }
+    .input-area input {
+      flex: 1;
+      padding: 18px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1.15rem;
+      outline: none;
+      margin-right: 12px;
+    }
+    .input-area button {
+      padding: 16px 28px;
+      background: #2D2DFF;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .input-area button:hover {
+      background: #6C63FF;
+    }
+    .source-preview {
+      margin-top: 10px;
+      font-size: 0.95em;
+      background: #f4f7fa;
+      border-left: 3px solid #6C63FF;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+    .source-preview a {
+      color: #2D2DFF;
+      text-decoration: underline;
+    }
+    .preview-text {
+      color: #333;
+      margin-top: 4px;
+    }
+    .references-title {
+      font-weight: 700;
+      color: #6C63FF;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+      letter-spacing: 0.01em;
+    }
+    .references {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 4px;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .ref-pill {
+      display: inline-flex;
+      align-items: center;
+      background: #6961ff;
+      color: #fff;
+      border-radius: 14px;
+      padding: 4px 14px;
+      text-decoration: none;
+      font-size: 0.93em;
+      font-weight: 400;
+      transition: background 0.2s;
+      border: 1.5px solid #fff;
+      box-shadow: 0 2px 8px #6961ff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 95%;
+    }
+    .ref-pill:hover {
+      background: #4b3fc4;
+    }
+    .ref-icon {
+      color: #ffffff;
+      margin-right: 6px;
+      font-size: 1.1em;
+    }
+    .demo-cta {
+      margin: 0 0 0 0;
+      display: flex;
+      justify-content: center;
+    }
+    .demo-link {
+      background: #6C63FF;
+      color: #fff;
+      border-radius: 14px;
+      padding: 15px 34px;
+      text-decoration: none;
+      font-size: 1.134em;
+      font-weight: 400;
+      text-align: center;
+      border: none;
+      box-shadow: 0 2px 8px rgba(44, 99, 255, 0.08);
+      transition: background 0.2s;
+      letter-spacing: 0.01em;
+      max-width: 320px;
+    }
+    .demo-link:hover {
+      background: #4b3fc4;
+      transform: scale(1.04);
+      box-shadow: 0 4px 16px #6C63FF33;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .fixed-search-bar {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100vw;
+      background: transparent;
+      box-shadow: none;
+      border-top: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 18px 0 18px 0;
+      z-index: 100;
+    }
+    .fixed-search-bar input {
+      width: 40vw;
+      max-width: 480px;
+      min-width: 200px;
+      padding: 16px 18px;
+      border-radius: 32px;
+      border: none;
+      background: #f8fafc;
+      font-size: 1.1em;
+      margin-right: 12px;
+      box-shadow: 0 1px 4px rgba(44, 99, 255, 0.04);
+      outline: none;
+      transition: box-shadow 0.2s;
+    }
+    .fixed-search-bar input:focus {
+      box-shadow: 0 2px 8px #6C63FF33;
+      border-color: #6C63FF;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .fixed-search-bar button {
+      background: linear-gradient(90deg, #6C63FF 0%, #2D2DFF 100%);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 1.3em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(44, 99, 255, 0.10);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .fixed-search-bar button:hover {
+      background: linear-gradient(90deg, #2D2DFF 0%, #6C63FF 100%);
+    }
+    .material-icons {
+      font-size: 28px;
+      vertical-align: middle;
+    }
+    .user-question-heading {
+      font-size: 1.35em;
+      color: #6C63FF;
+      margin-bottom: 18px;
+      font-weight: 400;
+      line-height: 1.2;
+    }
+    .bot-answer {
+      font-size: 1.08em;
+      color: #3a3a3a;
+      margin-bottom: 10px;
+      font-weight: 400;
+    }
+    .chat-response {
+      background: #f4f7fa;
+      border-radius: 18px;
+      padding: 24px 28px;
+      margin: 18px 0 4px 0;
+      font-size: 1.08em;
+      color: #23232b;
+      line-height: 1.6;
+    }
+    .chat-response ul {
+      margin: 12px 0 12px 24px;
+      padding: 0;
+    }
+    .chat-response a {
+      color: #2D2DFF;
+      text-decoration: underline;
+      word-break: break-all;
+    }
+    .chat-response strong {
+      color: #6C63FF;
+      font-weight: 600;
+    }
+    .chat-response h2, .chat-response .question-heading {
+      color: #6C63FF;
+      font-weight: 700;
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 1.35em;
+      line-height: 1.2;
+    }
+    .related-questions {
+      margin-top: 32px;
+    }
+    .related-title {
+      font-size: 1.1em;
+      color: #6C63FF;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .related-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .related-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 0 16px 0;
+      border-bottom: 1px solid #e0e0e0;
+      color: #23232b;
+      font-size: 1.08em;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .related-item:hover {
+      background: #f4f7fa;
+      color: #6C63FF;
+      font-weight: 700;
+      transform: translateX(4px) scale(1.03);
+      box-shadow: 0 2px 8px #6C63FF22;
+      transition: background 0.15s, color 0.15s, transform 0.2s, box-shadow 0.2s;
+    }
+    .related-icon {
+      color: #6C63FF;
+      font-size: 1.2em;
+      margin-right: 12px;
+    }
+    .chat-fade-in {
+      opacity: 0;
+      transform: translateY(32px) scale(0.98);
+      animation: fadeInUp 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    }
+    .listening {
+      box-shadow: 0 0 0 4px #6C63FF55;
+      border-color: #2D2DFF !important;
+      background: #e6e7ff !important;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse {
+      from { box-shadow: 0 0 0 4px #6C63FF55; }
+      to { box-shadow: 0 0 0 12px #6C63FF22; }
+    }
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .references-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 18px;
+      margin: 24px 0 24px 0;
+      flex-wrap: nowrap;
+    }
+    .reference-pill {
+      display: flex;
+      align-items: center;
+      background: #6C63FF;
+      color: #fff;
+      border-radius: 14px;
+      padding: 6px 16px 6px 12px;
+      font-size: 0.98em;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1.5px solid #6C63FF;
+      box-shadow: 0 1px 4px 6C63FF;
+      transition: background 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      cursor: pointer;
+      min-width: 0;
+      max-width: 320px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .reference-pill:hover {
+      background: #3838e6;
+      border-color: #3838e6;
+    }
+    .reference-icon {
+      color: #ffffff;
+      margin-right: 7px;
+      font-size: 1em;
+    }
+  </style>
+  <script>
+    let conversationHistory = [];
+
+    function askRelated(question) {
+      document.getElementById("query").value = question;
+      askNexla(question);
+    }
+
+    async function askNexla(optionalQuestion) {
+      const input = document.getElementById("query");
+      const chat = document.getElementById("chat-history");
+      const userMsg = optionalQuestion ? optionalQuestion : input.value.trim();
+      if (!userMsg) return;
+      input.value = ""; // Clear the input box immediately after sending
+      conversationHistory.push({ role: "user", content: userMsg });
+      chat.innerHTML += `<div class=\"message bot\" id=\"loading\">...</div>`;
+      chat.scrollTop = chat.scrollHeight;
+      const res = await fetch("/ask", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ query: userMsg, history: conversationHistory })
+      });
+      const data = await res.json();
+      document.getElementById("loading").remove();
+      conversationHistory.push({ role: "assistant", content: data.answer });
+      // Strip code block markers if present
+      let html = data.answer.replace(/```html|```/g, '').trim();
+      // Render related questions if present
+      let relatedHtml = "";
+      if (data.related_questions && data.related_questions.length > 0) {
+        relatedHtml = `<div class=\"related-questions\"><div class=\"related-title\">Related Questions</div><div class=\"related-list\">`;
+        data.related_questions.forEach(q => {
+          relatedHtml += `<div class=\"related-item\" onclick=\"askRelated('${q.replace(/'/g, "&#39;")}')\"><span class=\"related-icon\">&#8599;</span> ${q}</div>`;
+        });
+        relatedHtml += `</div></div>`;
+      }
+      // Add CTA block before related questions
+      const demoHtml = `
+        <div class=\"demo-cta\" style=\"margin-bottom: 32px;\">\n          <a class=\"demo-link\" href=\"https://nexla.com/demo/\" target=\"_blank\">\n            Schedule a demo\n          </a>\n        </div>\n      `;
+      // Render references bar if present
+      let referencesBarHtml = "";
+      if (data.references && data.references.length > 0) {
+        referencesBarHtml = `
+          <div class="references-title">References</div>
+          <div class="references-bar">
+            ${data.references.map(ref => `
+              <a class="reference-pill" href="${ref.link}" target="_blank">
+                <span class="material-icons reference-icon">link</span>
+                ${ref.title}
+              </a>
+            `).join('')}
+          </div>
+        `;
+      }
+      // Add the new answer and related sections
+      const answerId = `answer-${Date.now()}`;
+      chat.innerHTML += `<div id="${answerId}" class="chat-fade-in">${html + demoHtml + referencesBarHtml + relatedHtml}</div>`;
+      const newAnswer = document.getElementById(answerId);
+      // Custom scroll to ensure consistent margin between window and new answer
+      setTimeout(() => {
+        const chatRect = chat.getBoundingClientRect();
+        const answerRect = newAnswer.getBoundingClientRect();
+        const offset = answerRect.top - chatRect.top - 32; // 32px margin from top
+        chat.scrollBy({ top: offset, behavior: 'smooth' });
+      }, 200);
+    }
+    // Allow Enter to send
+    window.onload = () => {
+      const input = document.getElementById("query");
+      const voiceBtn = document.getElementById("voice-btn");
+      input.focus();
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") askNexla();
+      });
+      // Voice input support (moved inside onload)
+      let recognition;
+      if (voiceBtn && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        voiceBtn.onclick = () => {
+          recognition.start();
+          voiceBtn.classList.add('listening');
+        };
+        recognition.onresult = (event) => {
+          let transcript = event.results[0][0].transcript;
+          // Auto-correct common misrecognitions of 'Nexla'
+          transcript = transcript.replace(/\b(next law|neckla|next la|nexler|nexler|nekla|nex la|nextler|nexlar|nexus)\b/gi, 'Nexla');
+          input.value = transcript;
+          input.focus();
+          voiceBtn.classList.remove('listening');
+          // Wait 3 seconds before auto-sending, unless user edits input
+          voiceBtn.disabled = true;
+          let originalValue = transcript;
+          let autoSend = true;
+          const inputListener = () => {
+            if (input.value !== originalValue) {
+              autoSend = false;
+              clearTimeout(autoSendTimeout);
+              input.removeEventListener('input', inputListener);
+              voiceBtn.disabled = false;
+            }
+          };
+          input.addEventListener('input', inputListener);
+          const autoSendTimeout = setTimeout(() => {
+            input.removeEventListener('input', inputListener);
+            voiceBtn.disabled = false;
+            if (autoSend && input.value === originalValue) {
+              askNexla();
+            }
+          }, 2000);
+        };
+        recognition.onerror = () => {
+          voiceBtn.classList.remove('listening');
+        };
+        recognition.onend = () => {
+          voiceBtn.classList.remove('listening');
+        };
+      } else if (voiceBtn) {
+        voiceBtn.style.display = 'none';
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="nexla-header">
+      <img src="https://s5-recruiting.cdn.greenhouse.io/external_greenhouse_job_boards/logos/400/159/400/original/Nexla_Icon_Blue_RGB.png?1741305572" alt="Nexla Logo" />
+      <span>Ask Nexla</span>
+    </div>
+    <div class="chat-history" id="chat-history"></div>
+  </div>
+  <div class="fixed-search-bar">
+    <input type="text" id="query" placeholder="Ask a question..." autocomplete="off" />
+    <button onclick="askNexla()">
+      <span class="material-icons">send</span>
+    </button>
+    <button id="voice-btn" type="button" aria-label="Speak your question" title="Speak" style="margin-left:8px; background:#fff; border-radius:50%; border:1.5px solid #6C63FF; width:48px; height:48px; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+      <span class="material-icons" style="color:#6C63FF; font-size:28px;">mic</span>
+    </button>
+  </div>
+</body>
+</html>
